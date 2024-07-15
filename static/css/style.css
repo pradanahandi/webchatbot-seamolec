@@ -1,0 +1,20 @@
+body {
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.navbar {
+    width: 100%;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+.card {
+    margin-top: 50px;
+}

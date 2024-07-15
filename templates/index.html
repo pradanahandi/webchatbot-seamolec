@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #chat-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        #chat-box {
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+        }
+        .user, .assistant {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+        .assistant {
+            justify-content: flex-end;
+        }
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 20px;
+        }
+        .user .message {
+            background-color: #e9ecef;
+        }
+        .assistant .message {
+            background-color: #007bff;
+            color: #fff;
+        }
+        form {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-box">
+            {% for message in messages %}
+                <div class="{{ message.role }}">
+                    <div class="message">
+                        <strong>{{ message.role.capitalize() }}:</strong> {{ message.content }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <form method="POST">
+            <input type="text" name="prompt" placeholder="Enter your question" required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}Chat{% endblock %}
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Chat</h5>
+                    <form method="POST">
+                        <div class="form-group">
+                            <input type="text" id="prompt" name="prompt" class="form-control" placeholder="Enter your question" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                    {% if correction %}
+                        <div class="alert alert-warning mt-3">
+                            <strong>Correction Suggestion:</strong> {{ correction }}
+                        </div>
+                    {% endif %}
+                    {% if response %}
+                        <div class="alert alert-info mt-3">
+                            <strong>Assistant:</strong> {{ response }}
+                        </div>
+                        <audio controls autoplay>
+                            <source src="{{ url_for('static', filename='speech.mp3') }}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

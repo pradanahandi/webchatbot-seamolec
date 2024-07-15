@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}Chatbot{% endblock %}
+
+{% block content %}
+    <div id="chat-container">
+        <div class="btn-group">
+            <a href="{{ url_for('new_conversation') }}" class="btn btn-primary">New Conversation</a>
+            <a href="{{ url_for('load_conversations') }}" class="btn btn-secondary">Load Conversations</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        </div>
+        <div id="chat-box">
+            {% for message in messages %}
+                <div class="{{ message.role }}">
+                    <div class="message">
+                        <strong>{{ message.username if message.role == 'user' else message.role.capitalize() }}:</strong> {{ message.content }}
+                        {% if message.audio_file %}
+                            <br>
+                            <audio controls {{ 'autoplay' if loop.last else '' }}>
+                                <source src="{{ url_for('static', filename=message.audio_file) }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        {% endif %}
+                        {% if message.correction %}
+                            <br>
+                            <div class="correction">
+                                <strong>Correction Suggestion:</strong> {{ message.correction }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <form id="chat-form" method="POST">
+            <input type="text" id="prompt" name="prompt" placeholder="Enter your question" required>
+            <button type="button" id="start-record-btn">🎤</button>
+            <button type="submit" id="send-btn" style="display:none;">Send</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <!-- Web Speech API -->
+    <script>
+        var startRecordBtn = document.getElementById('start-record-btn');
+        var promptInput = document.getElementById('prompt');
+        var chatForm = document.getElementById('chat-form');
+        var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+        recognition.interimResults = false;
+        recognition.lang = 'id-ID';
+        recognition.maxAlternatives = 1;
+
+        startRecordBtn.addEventListener('click', function() {
+            recognition.start();
+        });
+
+        recognition.onresult = function(event) {
+            var transcript = event.results[0][0].transcript;
+            promptInput.value = transcript;
+            chatForm.submit();
+        };
+
+        recognition.onspeechend = function() {
+            recognition.stop();
+        };
+
+        recognition.onerror = function(event) {
+            console.error(event.error);
+        };
+
+        // Scroll to the latest message on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            var chatBox = document.getElementById("chat-box");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    </script>
+{% endblock %}
