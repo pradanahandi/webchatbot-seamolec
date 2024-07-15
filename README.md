@@ -1,6 +1,6 @@
-#Environment Variables
-host=your host
-user=your user
-password=your password
-database=your database
-apikey=your api key
+# Environment Variables<br/>
+`host=your host`<br/>
+`user=your user`<br/>
+`password=your password`<br/>
+`database=your database`<br/>
+`apikey=your api key`<br/>
