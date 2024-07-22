@@ -3,6 +3,7 @@
 {% block title %}Chatbot{% endblock %}
 
 {% block content %}
+<div id="main-container">
     <div id="chat-container">
         <div class="btn-group">
             <a href="{{ url_for('new_conversation') }}" class="btn btn-primary">New Conversation</a>
@@ -11,24 +12,24 @@
         </div>
         <div id="chat-box">
             {% for message in messages %}
-                <div class="{{ message.role }}">
-                    <div class="message">
-                        <strong>{{ message.username if message.role == 'user' else message.role.capitalize() }}:</strong> {{ message.content }}
-                        {% if message.audio_file %}
-                            <br>
-                            <audio controls {{ 'autoplay' if loop.last else '' }}>
-                                <source src="{{ url_for('static', filename=message.audio_file) }}" type="audio/mpeg">
-                                Your browser does not support the audio element.
-                            </audio>
-                        {% endif %}
-                        {% if message.correction %}
-                            <br>
-                            <div class="correction">
-                                <strong>Correction Suggestion:</strong> {{ message.correction }}
-                            </div>
-                        {% endif %}
+            <div class="{{ message.role }}">
+                <div class="message">
+                    <strong>{{ message.username if message.role == 'user' else message.role.capitalize() }}:</strong> {{ message.content }}
+                    {% if message.audio_file %}
+                    <br>
+                    <audio controls {{ 'autoplay' if loop.last else '' }} onplay="startMouthMovement()" onended="stopMouthMovement()">
+                        <source src="{{ url_for('static', filename=message.audio_file.replace('\\', '/')) }}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    {% endif %}
+                    {% if message.correction %}
+                    <br>
+                    <div class="correction">
+                        <strong>Correction Suggestion:</strong> {{ message.correction }}
                     </div>
+                    {% endif %}
                 </div>
+            </div>
             {% endfor %}
         </div>
         <form id="chat-form" method="POST">
@@ -37,54 +38,84 @@
             <button type="submit" id="send-btn" style="display:none;">Send</button>
         </form>
     </div>
+    <div id="sidebar">
+        <div id="user-camera-container">
+            <video id="user-camera" autoplay></video>
+        </div>
+        <div id="assistant-avatar-container">
+            <img id="assistant-avatar" src="{{ url_for('static', filename='images/avatar.png') }}" alt="Assistant Avatar">
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
-    <!-- Web Speech API -->
-    <script>
-        var startRecordBtn = document.getElementById('start-record-btn');
-        var promptInput = document.getElementById('prompt');
-        var chatForm = document.getElementById('chat-form');
-        var recognitionID = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        var recognitionEN = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        var currentRecognition = recognitionID;
+<!-- Web Speech API -->
+<script>
+    var startRecordBtn = document.getElementById('start-record-btn');
+    var promptInput = document.getElementById('prompt');
+    var chatForm = document.getElementById('chat-form');
+    var recognitionID = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    var recognitionEN = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    var currentRecognition = recognitionID;
 
-        recognitionID.interimResults = false;
-        recognitionID.lang = 'id-ID';
-        recognitionID.maxAlternatives = 1;
+    recognitionID.interimResults = false;
+    recognitionID.lang = 'id-ID';
+    recognitionID.maxAlternatives = 1;
 
-        recognitionEN.interimResults = false;
-        recognitionEN.lang = 'en-US';
-        recognitionEN.maxAlternatives = 1;
+    recognitionEN.interimResults = false;
+    recognitionEN.lang = 'en-US';
+    recognitionEN.maxAlternatives = 1;
 
-        startRecordBtn.addEventListener('click', function() {
-            currentRecognition.start();
+    startRecordBtn.addEventListener('click', function() {
+        currentRecognition.start();
+    });
+
+    currentRecognition.onresult = function(event) {
+        var transcript = event.results[0][0].transcript;
+        promptInput.value = transcript;
+        chatForm.submit();
+    };
+
+    currentRecognition.onspeechend = function() {
+        currentRecognition.stop();
+    };
+
+    currentRecognition.onerror = function(event) {
+        console.error(event.error);
+        if (currentRecognition === recognitionID) {
+            currentRecognition = recognitionEN;
+        } else {
+            currentRecognition = recognitionID;
+        }
+        currentRecognition.start();
+    };
+
+    // Scroll to the latest message on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        var chatBox = document.getElementById("chat-box");
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    // Access the user's camera
+    const video = document.getElementById('user-camera');
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+            video.srcObject = stream;
+        })
+        .catch(function (error) {
+            console.log("Something went wrong!");
         });
+    }
 
-        currentRecognition.onresult = function(event) {
-            var transcript = event.results[0][0].transcript;
-            promptInput.value = transcript;
-            chatForm.submit();
-        };
+    // Initialize assistant avatar
+    function startMouthMovement() {
+        document.getElementById('assistant-avatar').classList.add('speaking');
+    }
 
-        currentRecognition.onspeechend = function() {
-            currentRecognition.stop();
-        };
-
-        currentRecognition.onerror = function(event) {
-            console.error(event.error);
-            if (currentRecognition === recognitionID) {
-                currentRecognition = recognitionEN;
-            } else {
-                currentRecognition = recognitionID;
-            }
-            currentRecognition.start();
-        };
-
-        // Scroll to the latest message on page load
-        document.addEventListener("DOMContentLoaded", function() {
-            var chatBox = document.getElementById("chat-box");
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    </script>
+    function stopMouthMovement() {
+        document.getElementById('assistant-avatar').classList.remove('speaking');
+    }
+</script>
 {% endblock %}

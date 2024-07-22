@@ -5,6 +5,10 @@
 `database=your database`<br/>
 `apikey=your apikey`
 
+# API Endpoint
+
+
+
 # Table
 
 -- phpMyAdmin SQL Dump

@@ -32,8 +32,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-
-
 class User(UserMixin):
     def __init__(self, id, username, password):
         self.id = id
@@ -49,16 +47,12 @@ def load_user(user_id):
         return User(id=user['id'], username=user['username'], password=user['password'])
     return None
 
-def check_spelling_and_grammar(text):
-    """Check spelling and grammar using OpenAI GPT-4."""
-    completion = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "Please check the following text for any spelling or grammatical errors and suggest corrections."},
-            {"role": "user", "content": text}
-        ]
-    )
-    return completion.choices[0].message.content
+@app.route('/static-test')
+def static_test():
+    return url_for('static', filename='images/avatar.png')
+
+
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -208,6 +202,10 @@ def index():
     
     return render_template('audio.html', messages=messages, correction=correction)
 
+
+# Register the API blueprint
+from api import api as api_blueprint
+app.register_blueprint(api_blueprint, url_prefix='/api')
 
 if __name__ == '__main__':
     app.run(debug=True)
